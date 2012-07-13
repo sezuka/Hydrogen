@@ -1,0 +1,49 @@
+<?php
+if(HYDROGEN !== TRUE){
+	die("Access Denied");
+}
+?>
+<!-- Panel -->
+<div id="toppanel">
+	<div id="panel">
+		<div class="content clearfix">
+			<div class="left">
+				<h1>The Sliding jQuery Panel</h1>
+				<h2>A register/login solution</h2>		
+				<p class="grey">You are free to use this login and registration system in you sites!</p>
+				<h2>A Big Thanks</h2>
+				<p class="grey">This tutorial was built on top of <a href="http://web-kreation.com/index.php/tutorials/nice-clean-sliding-login-panel-built-with-jquery" title="Go to site">Web-Kreation</a>'s amazing sliding panel.</p>
+			</div>
+
+            <div class="left">
+            
+            <h1>Members panel</h1>
+            
+            <p>You can put member-only data here</p>
+            <a href="registered.php">View a special member page</a>
+            <p>- or -</p>
+            <a href="?logoff">Log off</a>
+            
+            </div>
+            
+            <div class="left right">
+            </div>
+            
+		</div>
+	</div> <!-- /login -->	
+
+    <!-- The tab on top -->	
+	<div class="tab">
+		<ul class="login">
+	    	<li class="left">&nbsp;</li>
+	        <li>Hello Sezuka!</li>
+			<li class="sep">|</li>
+			<li id="toggle">
+				<a id="open" class="open" href="#">Menu</a>
+				<a id="close" style="display: none;" class="close" href="#">Close Panel</a>			
+			</li>
+	    	<li class="right">&nbsp;</li>
+		</ul> 
+	</div> <!-- / top -->
+	
+</div> <!--panel -->

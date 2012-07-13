@@ -1,0 +1,120 @@
+<?php
+include_once("db.php");
+
+class User {
+	//vars
+	private $uid;
+	private $username;
+	private $password;
+	private $usertype;
+	
+}
+
+class Blog {
+	//vars
+	private $id;
+	private $title;
+	private $subtitle;
+	private $owner;
+	private $state;
+	
+	function __construct($blogid){
+		$data_query = mysql_query("SELECT * FROM blog WHERE id='".mysql_real_escape_string($blogid)."' LIMIT 1") or die(mysql_error());
+		if(mysql_num_rows($data_query) == 0){
+			$this->id = mysql_real_escape_string($blogid);
+			$this->title = 'Blog Unavailable';
+			$this->subtitle = '';
+			$this->owner = -1;
+			$this->state = -1;
+		}else{
+			while($row = mysql_fetch_assoc($data_query)){
+				$this->id = $row['id'];
+				$this->title = $row['title'];
+				$this->subtitle = $row['subtitle'];
+				$this->owner = $row['owner'];
+				$this->state = $row['state'];
+			}
+		}
+		unset($data_query);
+	}
+	
+	public function getBlogID(){
+		return $this->id;
+	}
+	
+	public function getBlogTitle(){
+		return $this->title;
+	}
+	
+	public function getBlogSubtitle(){
+		return $this->subtitle;
+	}
+	
+	public function getBlogOwnerID(){
+		return $this->owner;
+	}
+	
+	public function getBlogState(){
+		return $this->state;
+	}
+	
+	private function generatePost($postID, $postTitle, $postContent, $postTimestamp, $postHidden, $postEditMode){ // Generates the HTML for the post
+		if($postEditMode === TRUE){ //Owner/Staff
+			echo "<div class=\"container\">\n";
+			echo "<a title=\"Click here to permanantly delete this post.\" onClick=\"return confirm('Are you sure you wish to remove this post?');\" style=\"font-size: 10px;text-align: right;\" href=\"post.php?action=remove&ID={$postID}\">Remove</a>\n";
+			if($postHidden == TRUE){
+				echo " / <a title=\"Click here to show this post.\" style=\"font-size: 10px;\" href=\"post.php?action=show&ID={$postID}\">Unhide</a>\n";
+				echo "<h2 title=\"Posted on ".date("H:i D d M y", $postTimestamp)."\"><strong>[HIDDEN] </strong>{$postTitle}</h2><br />\n";
+			}else{
+				echo " / <a title=\"Click here to hide this post.\" style=\"font-size: 10px;\" href=\"post.php?action=hide&ID={$postID}\">Hide</a>\n";
+				echo "<h2 title=\"Posted on ".date("H:i D d M y", $postTimestamp)."\">{$postTitle}</a></h2><br />\n";
+			}
+			echo "<p>{$postContent}</p>\n";
+			echo "<div class=\"clear\"></div>\n";
+			echo "</div>\n\n";
+		}elseif($postEditMode === FALSE){ // Public view
+			echo "<div class=\"container\">\n";
+			echo "<a title=\"Click here to report this post.\" onClick=\"return confirm('Are you sure you wish to report this post?');\" style=\"font-size: 10px;text-align: right;color:#FF0000;\" href=\"post.php?action=report&ID={$postID}\">Report</a>\n";
+			echo "<h2 title=\"Posted on ".date("H:i D d M y", $postTimestamp)."\">{$postTitle}</h2><br />\n";
+			echo "<p>{$postContent}</p>\n";
+			echo "<div class=\"clear\"></div>\n";
+			echo "</div>\n\n";
+		}
+	}
+	
+	public function getPosts(){ //Generates all posts for blog using generatePost() function
+		if($_SESSION['UserID'] == $this->owner){ // Owner of post
+			//New Post
+			echo "<div class=\"container\">\n";
+			echo "<form method=\"POST\" name=\"newPost\" action=\"post.php?action=new&blogid={$this->id}\">
+							<h2>New Post</h2>
+							<input type=\"text\" name=\"newPost_title\" size=\"50\" /><br />
+							<textarea cols=\"50\" rows=\"5\" name=\"newPost_content\"></textarea><br />
+							<input type=\"submit\" value=\"Post that shit!\" />
+						</form><div class=\"clear\"></div></div>";
+			$data_query = mysql_query("SELECT * FROM `post` WHERE blog='".$this->id."' ORDER BY `id` DESC LIMIT 25") or die(mysql_error());
+			if(mysql_num_rows($data_query) > 0){
+				while($row = mysql_fetch_assoc($data_query)){
+					$this->generatePost($row['id'], $row['title'], $row['content'], $row['timestamp'], $row['hidden'], true);
+				}
+			}else{
+				echo "<div class=\"container\">\n<p>This blog has no posts!</p>\n<div class=\"clear\"></div>\n</div>\n";
+			}
+			unset($data_query);
+		}elseif($this->state == 0){ //Public & not banned (state != 1 and state !=2)
+			$data_query = mysql_query("SELECT * FROM `post` WHERE blog='".$this->id."' AND hidden='0' ORDER BY `id` DESC LIMIT 25") or die(mysql_error());
+			if(mysql_num_rows($data_query) > 0){
+				while($row = mysql_fetch_assoc($data_query)){
+					$this->generatePost($row['id'], $row['title'], $row['content'], $row['timestamp'], $row['hidden'], false);
+				}
+			}else{
+				echo "<div class=\"container\">\n<p>This blog has no posts!</p>\n<div class=\"clear\"></div>\n</div>\n";
+			}
+			unset($data_query);
+		}else{
+			echo "<div class=\"container\">\n<p>This blog is not available.</p>\n<div class=\"clear\"></div>\n</div>\n";
+		}
+	}
+}
+
+?>
