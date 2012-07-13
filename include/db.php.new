@@ -1,0 +1,8 @@
+<?php
+if(HYDROGEN !== TRUE){
+	die("DB: Access Denied");
+}
+mysql_connect("localhost", "root", "root") or die(mysql_error());
+mysql_select_db("Hydrogen") or die(mysql_error());
+
+?>
